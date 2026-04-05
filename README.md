@@ -1,44 +1,39 @@
-# solivite
+# Solivite 💝
 
-This template should help get you started developing with Vue 3 in Vite.
+Solivite is a date-scheduling web app that helps you plan and share special moments with your loved ones. Users can schedule moments, send invitations, and receive real-time status updates when invitations are accepted or declined.
 
-## Recommended IDE Setup
+## Members
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+- Blezceline Faith V. Saba
+- Lorenzo Paulo B. Tandog
 
-## Recommended Browser Setup
+## How to Run
 
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
+### Requirements
 
-## Customize configuration
+- Python 3.x — https://www.python.org/downloads/
+- Node.js & npm — https://nodejs.org/
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+### Backend (Flask)
 
-## Project Setup
-
-```sh
-npm install
+```bash
+python -m venv venv
+venv\Scripts\activate
+pip install flask flask-cors
+python init_db.py
+python app.py
 ```
 
-### Compile and Hot-Reload for Development
+### Frontend (Vue 3 + Vite)
 
-```sh
+```bash
+npm install
 npm run dev
 ```
 
-### Compile and Minify for Production
+### Open the App
 
-```sh
-npm run build
-```
-
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
-npm run lint
-```
+- Run in the terminal the python app.py
+- Make also to make another terminal and type npm run dev
+- Go to http://localhost:5173 in your browser
+- Double check if both python app.py and npm run dev is working
