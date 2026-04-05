@@ -19,7 +19,7 @@ Solivite is a date-scheduling web app that helps you plan and share special mome
 - Run in the terminal the python app.py
 - Make another terminal and type npm run dev
 - Go to http://localhost:5173 in your browser
-- Double check if both python app.py and npm run dev is working
+- if not working double check if both python app.py and npm run dev is working
 
 ### Backend (Flask)
 
