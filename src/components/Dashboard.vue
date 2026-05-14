@@ -728,6 +728,7 @@ const handleLogout = async () => {
   padding: 14px;
   border-radius: 12px;
   width: 100%;
+  box-sizing: border-box;
   outline: none;
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
   transition: all 0.3s;
