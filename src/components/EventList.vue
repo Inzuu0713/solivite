@@ -51,6 +51,7 @@ const getGoogleCalendarLink = (act) => {
             📍 {{ act.location }}
           </a>
           <span class="details-text">{{ act.date }} at {{ act.time }}</span>
+          <p v-if="act.message" class="message-text">"{{ act.message }}"</p>
         </div>
         <span :class="['status-badge', getStatusClass(act.invitation_status)]">
           {{ act.invitation_status || 'Pending' }}
@@ -211,6 +212,16 @@ const getGoogleCalendarLink = (act) => {
   color: #777;
   margin-top: 4px;
   font-weight: 600;
+}
+.message-text {
+  margin-top: 6px;
+  font-size: 13px;
+  font-style: italic;
+  color: #555;
+  background: rgba(0, 0, 0, 0.03);
+  padding: 6px 10px;
+  border-radius: 8px;
+  border-left: 2px solid #0284c7;
 }
 .action-buttons {
   display: flex;

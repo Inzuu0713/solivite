@@ -4,6 +4,7 @@ import sqlite3
 import hashlib
 import os
 import smtplib
+import threading
 from email.message import EmailMessage
 from dotenv import load_dotenv
 
@@ -112,6 +113,7 @@ def init_db():
             sender_id         INTEGER NOT NULL,
             receiver_email    TEXT    NOT NULL,
             message           TEXT,
+            location          TEXT,
             schedule_date     TEXT,
             schedule_time     TEXT,
             relationship_type TEXT,
@@ -141,24 +143,23 @@ SMTP_PORT = int(os.environ.get("SMTP_PORT", "587"))
 SMTP_USER = os.environ.get("SMTP_USER", "")
 SMTP_PASS = os.environ.get("SMTP_PASS", "")
 
-def send_email(to_address: str, subject: str, content: str):
+def _send_email_worker(to_address: str, subject: str, html_content: str):
+    """Internal worker — runs in a background thread."""
     if not SMTP_HOST or not SMTP_USER or not SMTP_PASS:
-        # Mock sending email by printing to terminal
         print("\n" + "="*50)
         print(f"MOCK EMAIL TO: {to_address}")
         print(f"SUBJECT: {subject}")
         print("-" * 50)
-        print(content)
+        print(html_content)
         print("="*50 + "\n")
         return
-
     try:
         msg = EmailMessage()
-        msg.set_content(content)
         msg['Subject'] = subject
         msg['From'] = SMTP_USER
         msg['To'] = to_address
-
+        msg.set_content('Please view this email in an HTML-compatible email client.')
+        msg.add_alternative(html_content, subtype='html')
         server = smtplib.SMTP(SMTP_HOST, SMTP_PORT)
         server.starttls()
         server.login(SMTP_USER, SMTP_PASS)
@@ -167,6 +168,11 @@ def send_email(to_address: str, subject: str, content: str):
         print(f"Email sent successfully to {to_address}")
     except Exception as e:
         print(f"Failed to send email to {to_address}: {e}")
+
+def send_email(to_address: str, subject: str, html_content: str):
+    """Non-blocking email send — fires in background thread immediately."""
+    t = threading.Thread(target=_send_email_worker, args=(to_address, subject, html_content), daemon=True)
+    t.start()
 # -------------------
 
 def hash_password(password: str) -> str:
@@ -253,6 +259,7 @@ def get_moments():
         cursor.execute("""
             SELECT m.*,
                    i.receiver_email,
+                   i.message as message,
                    COALESCE(i.status, 'Pending') as invitation_status,
                    'sender' as role
             FROM moments m
@@ -271,7 +278,8 @@ def get_moments():
                 i.schedule_date as date,
                 i.schedule_time as time,
                 i.relationship_type as target,
-                '' as location,
+                i.location as location,
+                i.message as message,
                 i.status as invitation_status,
                 u.name as sender_name,
                 'receiver' as role
@@ -399,15 +407,17 @@ def invite():
         if not user_id:
             return jsonify({"success": False, "message": "Unauthorized"}), 401
         data = request.get_json()
+        location = data.get('location', '')
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute("""
-            INSERT INTO invitations (sender_id, receiver_email, message, schedule_date, schedule_time, relationship_type, status)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO invitations (sender_id, receiver_email, message, location, schedule_date, schedule_time, relationship_type, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             user_id,
             data.get('receiver_email'),
             data.get('message'),
+            location,
             data.get('schedule_date'),
             data.get('schedule_time'),
             data.get('relationship_type'),
@@ -424,12 +434,53 @@ def invite():
         conn.close()
 
         if sender:
-            email_body = f"Hello,\n\nYou have received a new Moment Invitation from {sender['name']} ({sender['email']})!\n\n"
-            email_body += f"They want to invite you as their {data.get('relationship_type')} on {data.get('schedule_date')} at {data.get('schedule_time')}.\n"
-            if data.get('message'):
-                email_body += f"\nMessage: \"{data.get('message')}\"\n"
-            email_body += "\nLog in to Solivite to accept or decline."
-            send_email(data.get('receiver_email'), "New Moment Invitation!", email_body)
+            maps_url = f"https://www.google.com/maps/search/?api=1&query={location.replace(' ', '+')}"
+            schedule_date = data.get('schedule_date', '')
+            schedule_time = data.get('schedule_time', '')
+            relationship_type = data.get('relationship_type', '')
+            message_text = data.get('message', '')
+
+            # Build Google Calendar link
+            try:
+                from datetime import datetime, timedelta
+                dt_str = f"{schedule_date} {schedule_time}"
+                dt_start = datetime.strptime(dt_str, "%Y-%m-%d %H:%M")
+                dt_end = dt_start + timedelta(hours=2)
+                gcal_start = dt_start.strftime("%Y%m%dT%H%M%S")
+                gcal_end = dt_end.strftime("%Y%m%dT%H%M%S")
+                gcal_title = f"Solivite Date with {sender['name']}"
+                gcal_url = (f"https://www.google.com/calendar/render?action=TEMPLATE"
+                            f"&text={gcal_title.replace(' ', '+')}"
+                            f"&dates={gcal_start}/{gcal_end}"
+                            f"&details=Solivite+Invitation+from+{sender['name'].replace(' ', '+')}"
+                            f"&location={location.replace(' ', '+')}")
+            except Exception:
+                gcal_url = "https://calendar.google.com"
+
+            # HTML email to receiver
+            receiver_html = f"""
+            <html><body style="font-family: Arial, sans-serif; background:#f9f9f9; padding:30px;">
+              <div style="max-width:520px;margin:auto;background:white;border-radius:16px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.1);">
+                <div style="background:linear-gradient(135deg,#ff758c,#ff7eb3);padding:30px;text-align:center;">
+                  <h1 style="color:white;margin:0;font-size:26px;">💌 You're Invited!</h1>
+                </div>
+                <div style="padding:30px;">
+                  <p style="font-size:16px;color:#333;">Hi there! <strong>{sender['name']}</strong> is inviting you as their <strong>{relationship_type}</strong> on Solivite.</p>
+                  <div style="background:#fff5f7;border-left:4px solid #ff758c;border-radius:8px;padding:20px;margin:20px 0;">
+                    <p style="margin:8px 0;">📅 <strong>Date:</strong> {schedule_date}</p>
+                    <p style="margin:8px 0;">⏰ <strong>Time:</strong> {schedule_time}</p>
+                    <p style="margin:8px 0;">📍 <strong>Location:</strong> {location}</p>
+                    <p style="margin:8px 0;"><a href="{maps_url}" style="color:#ff758c;font-weight:bold;">🗺️ View on Google Maps</a></p>
+                  </div>
+                  {f'<p style="font-style:italic;color:#666;">💬 &ldquo;{message_text}&rdquo;</p>' if message_text else ''}
+                  <a href="{gcal_url}" style="display:inline-block;margin-top:10px;background:#4285f4;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;">📆 Add to Google Calendar</a>
+                  <hr style="margin:25px 0;border:none;border-top:1px solid #eee;">
+                  <p style="color:#888;font-size:13px;">Log in to <strong>Solivite</strong> to accept or decline this invitation.</p>
+                </div>
+              </div>
+            </body></html>
+            """
+            send_email(data.get('receiver_email'), f"New Moment Invitation from {sender['name']}!", receiver_html)
 
         return jsonify({"success": True})
     except Exception as e:
@@ -456,14 +507,53 @@ def get_invites(email):
 def respond():
     try:
         data = request.get_json()
+        action = data.get('action')  # 'Accepted' or 'Declined'
+        invitation_id = data.get('invitation_id')
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute(
             "UPDATE invitations SET status = ? WHERE id = ?",
-            (data.get('action'), data.get('invitation_id'))
+            (action, invitation_id)
         )
         conn.commit()
+
+        # Fetch invitation details to email the sender
+        cursor.execute("""
+            SELECT i.*, u.name AS sender_name, u.email AS sender_email
+            FROM invitations i
+            JOIN users u ON u.id = i.sender_id
+            WHERE i.id = ?
+        """, (invitation_id,))
+        inv = cursor.fetchone()
         conn.close()
+
+        if inv:
+            location = inv['location'] or ''
+            maps_url = f"https://www.google.com/maps/search/?api=1&query={location.replace(' ', '+')}" if location else ''
+            action_label = 'accepted ✅' if action == 'Accepted' else 'declined ❌'
+            color = '#4ade80' if action == 'Accepted' else '#f87171'
+            emoji = '🎉' if action == 'Accepted' else '😔'
+
+            notify_html = f"""
+            <html><body style="font-family: Arial, sans-serif; background:#f9f9f9; padding:30px;">
+              <div style="max-width:520px;margin:auto;background:white;border-radius:16px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.1);">
+                <div style="background:{color};padding:30px;text-align:center;">
+                  <h1 style="color:white;margin:0;font-size:26px;">{emoji} Invitation {action}!</h1>
+                </div>
+                <div style="padding:30px;">
+                  <p style="font-size:16px;color:#333;">Hi <strong>{inv['sender_name']}</strong>, your invitation has been <strong>{action_label}</strong> by <strong>{inv['receiver_email']}</strong>.</p>
+                  <div style="background:#f9f9f9;border-left:4px solid {color};border-radius:8px;padding:20px;margin:20px 0;">
+                    <p style="margin:8px 0;">📅 <strong>Date:</strong> {inv['schedule_date']}</p>
+                    <p style="margin:8px 0;">⏰ <strong>Time:</strong> {inv['schedule_time']}</p>
+                    {f'<p style="margin:8px 0;">📍 <strong>Location:</strong> {location}</p>' if location else ''}
+                    {f'<p style="margin:8px 0;"><a href="{maps_url}" style="color:#ff758c;font-weight:bold;">🗺️ View on Google Maps</a></p>' if maps_url else ''}
+                  </div>
+                </div>
+              </div>
+            </body></html>
+            """
+            send_email(inv['sender_email'], f"Your Solivite Invitation was {action}!", notify_html)
+
         return jsonify({"success": True})
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500

@@ -101,6 +101,7 @@ const submitMoment = async () => {
         await api.post('/invite', {
           receiver_email: newMoment.value.email,
           message: newMoment.value.message,
+          location: newMoment.value.location,
           schedule_date: newMoment.value.date,
           schedule_time: newMoment.value.time,
           relationship_type: newMoment.value.invitee,
@@ -177,6 +178,28 @@ const handleLogout = async () => {
   activities.value = []
   invitations.value = []
   router.push('/login')
+}
+
+const buildCalendarUrl = (invite) => {
+  try {
+    const [year, month, day] = invite.schedule_date.split('-')
+    const [hour, minute] = invite.schedule_time.split(':')
+    const pad = (n) => String(n).padStart(2, '0')
+    const start = `${year}${month}${day}T${pad(hour)}${pad(minute)}00`
+    // Default 2-hour event
+    let endHour = parseInt(hour, 10) + 2
+    let endDay = day
+    let endMonth = month
+    let endYear = year
+    if (endHour >= 24) { endHour -= 24; endDay = pad(parseInt(day, 10) + 1) }
+    const end = `${endYear}${endMonth}${pad(endDay)}T${pad(endHour)}${pad(minute)}00`
+    const title = encodeURIComponent(`Solivite Date with ${invite.sender_name}`)
+    const details = encodeURIComponent(`Solivite invitation from ${invite.sender_name}`)
+    const location = encodeURIComponent(invite.location || '')
+    return `https://www.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${start}/${end}&details=${details}&location=${location}`
+  } catch {
+    return 'https://calendar.google.com'
+  }
 }
 </script>
 
@@ -301,9 +324,24 @@ const handleLogout = async () => {
                     Invitation from <strong>{{ invite.sender_name }}</strong>
                   </span>
                   <p class="invite-meta">
-                    📅 {{ invite.schedule_date }} | ⏰ {{ invite.schedule_time }}
+                    📅 {{ invite.schedule_date }} &nbsp;|&nbsp; ⏰ {{ invite.schedule_time }}
+                  </p>
+                  <p v-if="invite.location" class="invite-meta invite-location">
+                    📍 {{ invite.location }}
+                    &nbsp;
+                    <a
+                      :href="`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(invite.location)}`"
+                      target="_blank"
+                      class="maps-link"
+                    >🗺️ View on Google Maps</a>
                   </p>
                   <p v-if="invite.message" class="invite-msg">"{{ invite.message }}"</p>
+                  <a
+                    v-if="invite.schedule_date && invite.schedule_time"
+                    :href="buildCalendarUrl(invite)"
+                    target="_blank"
+                    class="gcal-btn"
+                  >📆 Add to Google Calendar</a>
                 </div>
                 <div class="invite-actions">
                   <button class="accept-btn neumorphic-btn" @click="handleInvite(invite.id, 'accepted')">
@@ -771,5 +809,43 @@ const handleLogout = async () => {
   text-align: center;
   padding: 40px;
   font-style: italic;
+}
+
+.invite-location {
+  font-size: 14px;
+  margin-top: 6px;
+  color: rgba(255,255,255,0.85);
+}
+
+.maps-link {
+  color: #ffd700;
+  font-weight: bold;
+  text-decoration: none;
+  margin-left: 6px;
+  font-size: 13px;
+  transition: color 0.2s;
+}
+.maps-link:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
+.gcal-btn {
+  display: inline-block;
+  margin-top: 12px;
+  background: linear-gradient(135deg, #4285f4, #34a853);
+  color: white;
+  padding: 9px 18px;
+  border-radius: 10px;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: bold;
+  letter-spacing: 0.3px;
+  box-shadow: 0 3px 10px rgba(66,133,244,0.4);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.gcal-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(66,133,244,0.5);
 }
 </style>

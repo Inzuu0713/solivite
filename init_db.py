@@ -27,6 +27,7 @@ CREATE TABLE IF NOT EXISTS invitations (
     sender_id         INTEGER NOT NULL,
     receiver_email    TEXT    NOT NULL,
     message           TEXT,
+    location          TEXT,
     schedule_date     TEXT,
     schedule_time     TEXT,
     relationship_type TEXT,

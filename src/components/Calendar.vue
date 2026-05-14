@@ -161,6 +161,9 @@ const handleAction = (action) => {
           <strong>Location:</strong> 
           <a :href="getGoogleMapsLink(selectedEvent.location)" target="_blank" class="location-link">📍 {{ selectedEvent.location }}</a>
         </p>
+        <p v-if="selectedEvent.message" class="message-text">
+          <strong>Message:</strong> <i>"{{ selectedEvent.message }}"</i>
+        </p>
         <p><strong>Status:</strong> <span :style="{ color: getStatusColor(selectedEvent.invitation_status) }">{{ selectedEvent.invitation_status || 'Pending' }}</span></p>
         
         <div class="modal-actions">
@@ -312,6 +315,12 @@ const handleAction = (action) => {
   margin: 0;
   font-size: 14px;
   color: #555;
+}
+.message-text {
+  background: rgba(0, 0, 0, 0.03);
+  padding: 8px 10px;
+  border-radius: 8px;
+  border-left: 3px solid #0284c7;
 }
 .location-link {
   color: #0284c7;
