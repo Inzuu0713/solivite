@@ -19,17 +19,60 @@ const activities = ref([])
 const invitations = ref([])
 
 const themes = [
-  { id: 'blue-pink', name: 'Blue to Pink', value: 'linear-gradient(135deg, #8ec5fc 0%, #e0c3fc 100%)' },
-  { id: 'violet-orange', name: 'Violet to Orange', value: 'linear-gradient(135deg, #b088f9 0%, #ffc0a1 100%)' },
+  {
+    id: 'blue-pink',
+    name: 'Blue to Pink',
+    value: 'linear-gradient(135deg, #8ec5fc 0%, #e0c3fc 100%)',
+  },
+  {
+    id: 'violet-orange',
+    name: 'Violet to Orange',
+    value: 'linear-gradient(135deg, #b088f9 0%, #ffc0a1 100%)',
+  },
   { id: 'sky', name: 'Sky Color', value: 'linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%)' },
   { id: 'ocean', name: 'Ocean Color', value: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' },
-  { id: 'mountains', name: 'Sunset Mountains', value: 'url("https://images.unsplash.com/photo-1542224566-6e85f2e6772f?q=80&w=2000&auto=format&fit=crop")' },
-  { id: 'golden-sky', name: 'Golden Sky', value: 'url("https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2000&auto=format&fit=crop")' },
-  { id: 'purple-twilight', name: 'Purple Twilight', value: 'url("https://images.unsplash.com/photo-1502481851512-e9e2529bfbf9?q=80&w=2000&auto=format&fit=crop")' },
-  { id: 'ocean-breeze', name: 'Ocean Breeze', value: 'url("https://images.unsplash.com/photo-1505118380757-91f5f5632de0?q=80&w=2000&auto=format&fit=crop")' },
-  { id: 'sunset-glow', name: 'Warm Sunset', value: 'url("https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?q=80&w=2000&auto=format&fit=crop")' },
-  { id: 'going-night', name: 'Going Night', value: 'url("https://images.unsplash.com/photo-1472552944129-b035e9ea3744?q=80&w=2000&auto=format&fit=crop")' },
-  { id: 'starry-sky', name: 'Starry Sky', value: 'url("https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=2000&auto=format&fit=crop")' }
+  {
+    id: 'mountains',
+    name: 'Sunset Mountains',
+    value:
+      'url("https://images.unsplash.com/photo-1542224566-6e85f2e6772f?q=80&w=2000&auto=format&fit=crop")',
+  },
+  {
+    id: 'golden-sky',
+    name: 'Golden Sky',
+    value:
+      'url("https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2000&auto=format&fit=crop")',
+  },
+  {
+    id: 'purple-twilight',
+    name: 'Purple Twilight',
+    value:
+      'url("https://images.unsplash.com/photo-1502481851512-e9e2529bfbf9?q=80&w=2000&auto=format&fit=crop")',
+  },
+  {
+    id: 'ocean-breeze',
+    name: 'Ocean Breeze',
+    value:
+      'url("https://images.unsplash.com/photo-1505118380757-91f5f5632de0?q=80&w=2000&auto=format&fit=crop")',
+  },
+  {
+    id: 'sunset-glow',
+    name: 'Warm Sunset',
+    value:
+      'url("https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?q=80&w=2000&auto=format&fit=crop")',
+  },
+  {
+    id: 'going-night',
+    name: 'Going Night',
+    value:
+      'url("https://images.unsplash.com/photo-1472552944129-b035e9ea3744?q=80&w=2000&auto=format&fit=crop")',
+  },
+  {
+    id: 'starry-sky',
+    name: 'Starry Sky',
+    value:
+      'url("https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=2000&auto=format&fit=crop")',
+  },
 ]
 const currentTheme = ref(localStorage.getItem('app_theme') || themes[0].value)
 
@@ -67,7 +110,15 @@ const fetchInvitations = async () => {
   }
 }
 
-const newMoment = ref({ id: null, invitee: '', location: '', date: '', time: '', email: '', message: '' })
+const newMoment = ref({
+  id: null,
+  invitee: '',
+  location: '',
+  date: '',
+  time: '',
+  email: '',
+  message: '',
+})
 
 const nextStep = () => {
   if (
@@ -84,19 +135,19 @@ const nextStep = () => {
 
 const submitMoment = async () => {
   try {
-    const isEditing = !!newMoment.value.id;
+    const isEditing = !!newMoment.value.id
     const payload = {
       title: `Date at ${newMoment.value.location}`,
       target: newMoment.value.invitee,
       location: newMoment.value.location,
       date: newMoment.value.date,
       time: newMoment.value.time,
-    };
+    }
 
     if (isEditing) {
-      await api.put(`/moments/${newMoment.value.id}`, payload);
+      await api.put(`/moments/${newMoment.value.id}`, payload)
     } else {
-      const { data } = await api.post('/moments', payload);
+      const { data } = await api.post('/moments', payload)
       if (data.success && newMoment.value.email) {
         await api.post('/invite', {
           receiver_email: newMoment.value.email,
@@ -108,7 +159,7 @@ const submitMoment = async () => {
         })
       }
     }
-    
+
     await fetchMoments()
     closeModal()
   } catch (err) {
@@ -125,7 +176,15 @@ const submitMoment = async () => {
 const closeModal = () => {
   showModal.value = false
   currentStep.value = 1
-  newMoment.value = { id: null, invitee: '', location: '', date: '', time: '', email: '', message: '' }
+  newMoment.value = {
+    id: null,
+    invitee: '',
+    location: '',
+    date: '',
+    time: '',
+    email: '',
+    message: '',
+  }
 }
 
 const openEditModal = (moment) => {
@@ -136,7 +195,7 @@ const openEditModal = (moment) => {
     date: moment.date,
     time: moment.time,
     email: '',
-    message: ''
+    message: '',
   }
   showModal.value = true
 }
@@ -248,9 +307,9 @@ const buildCalendarUrl = (invite) => {
             <div class="theme-selector">
               <label>Theme</label>
               <div class="theme-options">
-                <div 
-                  v-for="t in themes" 
-                  :key="t.id" 
+                <div
+                  v-for="t in themes"
+                  :key="t.id"
                   class="theme-dot"
                   :style="{ background: t.value }"
                   :class="{ active: currentTheme === t.value }"
@@ -285,7 +344,11 @@ const buildCalendarUrl = (invite) => {
             </button>
           </header>
 
-          <EventList :activities="activities" @cancel-moment="cancelMoment" @edit-moment="openEditModal" />
+          <EventList
+            :activities="activities"
+            @cancel-moment="cancelMoment"
+            @edit-moment="openEditModal"
+          />
         </div>
 
         <div v-if="currentTab === 'calendar'">
@@ -299,9 +362,9 @@ const buildCalendarUrl = (invite) => {
             </button>
           </header>
 
-          <Calendar 
-            :activities="activities" 
-            @respond-invite="handleInvite" 
+          <Calendar
+            :activities="activities"
+            @respond-invite="handleInvite"
             @cancel-moment="cancelMoment"
             @edit-moment="openEditModal"
           />
@@ -318,7 +381,11 @@ const buildCalendarUrl = (invite) => {
           <section class="recent-section">
             <div class="activity-feed">
               <div v-if="invitations.length === 0" class="empty-state">No new invitations.</div>
-              <div v-for="invite in invitations" :key="invite.id" class="invite-card neumorphic-panel">
+              <div
+                v-for="invite in invitations"
+                :key="invite.id"
+                class="invite-card neumorphic-panel"
+              >
                 <div class="invite-details">
                   <span class="invite-from">
                     Invitation from <strong>{{ invite.sender_name }}</strong>
@@ -344,10 +411,16 @@ const buildCalendarUrl = (invite) => {
                   >📆 Add to Google Calendar</a>
                 </div>
                 <div class="invite-actions">
-                  <button class="accept-btn neumorphic-btn" @click="handleInvite(invite.id, 'accepted')">
+                  <button
+                    class="accept-btn neumorphic-btn"
+                    @click="handleInvite(invite.id, 'accepted')"
+                  >
                     Accept
                   </button>
-                  <button class="decline-btn neumorphic-btn" @click="handleInvite(invite.id, 'declined')">
+                  <button
+                    class="decline-btn neumorphic-btn"
+                    @click="handleInvite(invite.id, 'declined')"
+                  >
                     Decline
                   </button>
                 </div>
@@ -393,11 +466,11 @@ const buildCalendarUrl = (invite) => {
             <div class="form-row">
               <div class="form-group">
                 <label>Date</label>
-                <input type="date" v-model="newMoment.date" class="neumorphic-input"/>
+                <input type="date" v-model="newMoment.date" class="neumorphic-input" />
               </div>
               <div class="form-group">
                 <label>Time</label>
-                <input type="time" v-model="newMoment.time" class="neumorphic-input"/>
+                <input type="time" v-model="newMoment.time" class="neumorphic-input" />
               </div>
             </div>
             <div class="modal-actions">
@@ -416,7 +489,9 @@ const buildCalendarUrl = (invite) => {
             </div>
             <div class="modal-actions">
               <button class="cancel-btn neumorphic-btn" @click="currentStep = 1">Back</button>
-              <button class="confirm-btn neumorphic-btn primary" @click="submitMoment">Send Invitation</button>
+              <button class="confirm-btn neumorphic-btn primary" @click="submitMoment">
+                Send Invitation
+              </button>
             </div>
           </div>
         </div>
@@ -449,7 +524,7 @@ const buildCalendarUrl = (invite) => {
   border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 30px;
   overflow: hidden;
-  box-shadow: 
+  box-shadow:
     10px 10px 30px rgba(0, 0, 0, 0.2),
     -10px -10px 30px rgba(255, 255, 255, 0.1);
 }
@@ -514,7 +589,9 @@ const buildCalendarUrl = (invite) => {
   background: rgba(255, 255, 255, 0.2);
   opacity: 1;
   font-weight: bold;
-  box-shadow: inset 2px 2px 5px rgba(255, 255, 255, 0.1), inset -2px -2px 5px rgba(0, 0, 0, 0.1);
+  box-shadow:
+    inset 2px 2px 5px rgba(255, 255, 255, 0.1),
+    inset -2px -2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .badge {
@@ -544,7 +621,7 @@ const buildCalendarUrl = (invite) => {
 
 .theme-selector label {
   font-size: 12px;
-  color: rgba(255,255,255,0.7);
+  color: rgba(255, 255, 255, 0.7);
   margin-bottom: 8px;
   display: block;
   font-weight: bold;
@@ -560,7 +637,7 @@ const buildCalendarUrl = (invite) => {
   cursor: pointer;
   border: 2px solid transparent;
   transition: transform 0.2s;
-  box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
 }
 .theme-dot:hover {
   transform: scale(1.1);
@@ -600,14 +677,14 @@ const buildCalendarUrl = (invite) => {
 .avatar-ring {
   width: 45px;
   height: 45px;
-  background: rgba(255,255,255,0.9);
+  background: rgba(255, 255, 255, 0.9);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #6366f1;
   font-size: 20px;
-  box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
+  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .dashboard-body {
@@ -627,10 +704,10 @@ const buildCalendarUrl = (invite) => {
   font-size: 32px;
   font-weight: 800;
   margin-bottom: 5px;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
 }
 .welcome p {
-  color: rgba(255,255,255,0.8);
+  color: rgba(255, 255, 255, 0.8);
   font-size: 16px;
 }
 
@@ -639,7 +716,7 @@ const buildCalendarUrl = (invite) => {
   background: rgba(255, 255, 255, 0.05);
   border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 
+  box-shadow:
     4px 4px 10px rgba(0, 0, 0, 0.1),
     -4px -4px 10px rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(10px);
@@ -648,10 +725,10 @@ const buildCalendarUrl = (invite) => {
 .neumorphic-panel-inset {
   background: rgba(0, 0, 0, 0.1);
   border-radius: 16px;
-  box-shadow: 
+  box-shadow:
     inset 4px 4px 8px rgba(0, 0, 0, 0.2),
     inset -4px -4px 8px rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255,255,255,0.05);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .neumorphic-btn {
@@ -663,7 +740,7 @@ const buildCalendarUrl = (invite) => {
   font-weight: bold;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 
+  box-shadow:
     4px 4px 10px rgba(0, 0, 0, 0.1),
     -4px -4px 10px rgba(255, 255, 255, 0.1);
 }
@@ -672,7 +749,7 @@ const buildCalendarUrl = (invite) => {
   transform: translateY(-2px);
 }
 .neumorphic-btn:active {
-  box-shadow: inset 2px 2px 5px rgba(0,0,0,0.1);
+  box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.1);
   transform: translateY(0);
 }
 .neumorphic-btn.primary {
@@ -689,6 +766,7 @@ const buildCalendarUrl = (invite) => {
   padding: 14px;
   border-radius: 12px;
   width: 100%;
+  box-sizing: border-box;
   outline: none;
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
   transition: all 0.3s;
@@ -709,7 +787,10 @@ const buildCalendarUrl = (invite) => {
 /* Modals */
 .modal-overlay {
   position: absolute;
-  top: 0; left: 0; width: 100%; height: 100%;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(8px);
   display: flex;
@@ -720,7 +801,7 @@ const buildCalendarUrl = (invite) => {
 .modal-content {
   width: 420px;
   padding: 35px;
-  background: rgba(255, 255, 255, 0.95); /* Clean frosted glass */
+  background: rgba(255, 255, 255, 0.95);
   border-radius: 30px;
   border: 1px solid rgba(255, 255, 255, 0.4);
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
@@ -756,8 +837,18 @@ const buildCalendarUrl = (invite) => {
   gap: 15px;
   margin-top: 30px;
 }
-.cancel-btn, .confirm-btn {
+.cancel-btn,
+.confirm-btn {
   flex: 1;
+}
+
+.modal-actions .cancel-btn {
+  background: #e53e3e;
+  color: white;
+  border: none;
+}
+.modal-actions .cancel-btn:hover {
+  background: #c53030;
 }
 
 /* Invitations */
@@ -775,7 +866,7 @@ const buildCalendarUrl = (invite) => {
   font-size: 18px;
 }
 .invite-meta {
-  color: rgba(255,255,255,0.7);
+  color: rgba(255, 255, 255, 0.7);
   margin-top: 5px;
   font-size: 14px;
 }
