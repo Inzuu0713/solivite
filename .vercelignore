@@ -1,3 +1,7 @@
 requirements.txt
 venv/
 *.py
+app.py
+init_db.py
+merge_db.py
+solivite.db
