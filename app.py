@@ -478,6 +478,15 @@ def reply_to_declined():
 def logout():
     session.clear()
     return jsonify({"success": True})
+    
+@app.route('/admin/users', methods=['GET'])
+def admin_users():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, name, email FROM users")
+    users = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return jsonify({"users": users})
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=4000, debug=False)
