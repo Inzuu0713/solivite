@@ -942,16 +942,18 @@ const buildCalendarUrl = (invite) => {
 @media (max-width: 768px) {
   .page-container {
     padding: 0;
-    align-items: flex-start;
   }
   .dashboard-frame {
     flex-direction: column;
     height: auto;
     min-height: 100vh;
     border-radius: 0;
+    overflow-x: hidden;
+    width: 100vw;
   }
   .sidebar {
     width: 100%;
+    box-sizing: border-box;
     padding: 16px;
     border-right: none;
     border-bottom: 1px solid rgba(255,255,255,0.1);
@@ -965,21 +967,18 @@ const buildCalendarUrl = (invite) => {
     padding: 8px 12px;
     font-size: 12px;
     margin-bottom: 0;
-    flex: 1;
-    min-width: 100px;
-    justify-content: center;
   }
   .user-card {
     display: none;
   }
   .dashboard-body {
     padding: 16px;
+    box-sizing: border-box;
+    width: 100%;
+    overflow-x: hidden;
   }
   .welcome h1 {
     font-size: 20px;
-  }
-  .welcome p {
-    font-size: 14px;
   }
   .top-bar {
     flex-direction: column;
@@ -988,7 +987,6 @@ const buildCalendarUrl = (invite) => {
   }
   .create-btn {
     width: 100%;
-    text-align: center;
   }
   .modal-content {
     width: 95%;
