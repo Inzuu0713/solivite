@@ -20,11 +20,12 @@ const handleLogin = async () => {
     })
 
     if (data.success) {
-      localStorage.setItem('isLoggedIn', 'true')
-      localStorage.setItem('user_fullname', data.name)
-      localStorage.setItem('user_email', data.email)
-      router.push('/dashboard')
-    } else {
+  localStorage.setItem('isLoggedIn', 'true')
+  localStorage.setItem('user_fullname', data.name)
+  localStorage.setItem('user_email', data.email)
+  localStorage.setItem('user_id', data.user_id)
+  router.push('/dashboard')
+} else {
       alert(data.message)
     }
   } catch (error) {
