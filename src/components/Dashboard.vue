@@ -996,4 +996,11 @@ const buildCalendarUrl = (invite) => {
     flex-direction: column;
   }
 }
+* {
+  box-sizing: border-box;
+}
+
+body {
+  overflow-x: hidden;
+}
 </style>
