@@ -5,6 +5,14 @@ const api = axios.create({
   withCredentials: true,
 })
 
+api.interceptors.request.use((config) => {
+  const userId = localStorage.getItem('user_id')
+  if (userId) {
+    config.headers['X-User-Id'] = userId
+  }
+  return config
+})
+
 api.interceptors.response.use(
   (res) => res,
   (err) => {
