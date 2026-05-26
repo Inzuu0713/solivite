@@ -488,5 +488,14 @@ def admin_users():
     conn.close()
     return jsonify({"users": users})
 
+@app.route('/admin/users/<int:user_id>', methods=['DELETE'])
+def admin_delete_user(user_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM users WHERE id = ?", (user_id,))
+    conn.commit()
+    conn.close()
+    return jsonify({"success": True})
+
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=4000, debug=False)
