@@ -277,30 +277,37 @@ const getGoogleCalendarLink = (act) => {
 }
 @media (max-width: 768px) {
   .activity-row {
-    flex-wrap: wrap;
+    flex-direction: column;
+    align-items: flex-start;
     padding: 14px 16px;
     gap: 10px;
   }
+  .status-dot {
+    display: none;
+  }
   .activity-info {
-    flex: 1;
-    min-width: 0;
+    width: 100%;
   }
   .status-badge {
     margin-left: 0;
   }
   .action-buttons {
     width: 100%;
+    display: flex;
     flex-wrap: wrap;
+    gap: 8px;
   }
   .neumorphic-btn-sm {
     flex: 1;
     text-align: center;
     justify-content: center;
+    white-space: nowrap;
   }
   .calendar-action-btn {
     flex: 1;
     justify-content: center;
     text-align: center;
+    white-space: nowrap;
   }
 }
 </style>
