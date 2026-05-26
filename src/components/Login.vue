@@ -370,10 +370,15 @@ const handleLogin = async () => {
 }
 
 /* Responsive Design */
-@media (max-width: 850px) {
+@media (max-width: 768px) {
+  .auth-page {
+    padding: 16px;
+    align-items: flex-start;
+    padding-top: 30px;
+  }
   .split-layout-container {
     flex-direction: column;
-    gap: 40px;
+    gap: 24px;
   }
   .brand-section {
     align-items: center;
@@ -381,6 +386,20 @@ const handleLogin = async () => {
   }
   .features-list {
     align-items: center;
+    width: 100%;
+  }
+  .logo-text {
+    font-size: 28px;
+  }
+  .tagline {
+    font-size: 20px;
+    margin-bottom: 24px;
+  }
+  .form-card {
+    padding: 24px;
+  }
+  .form-section {
+    width: 100%;
   }
 }
 </style>
