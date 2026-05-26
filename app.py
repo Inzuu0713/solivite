@@ -33,7 +33,7 @@ CORS(app,
      methods=["GET", "POST", "DELETE", "PUT", "OPTIONS"])
 
 DB_URL = os.environ.get("DATABASE_URL")
-DB_PATH = "solivite.db"
+DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "solivite.db")
 
 class CursorWrapper:
     def __init__(self, cursor, is_pg):
